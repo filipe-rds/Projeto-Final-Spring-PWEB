@@ -1,6 +1,6 @@
 package com.api.users.entity;
 
-import com.api.users.dto.UsuarioDTO;
+import com.api.users.dto.UsuarioCadastroDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class Usuario {
     private String email;
     private String senha;
 
-    public Usuario (UsuarioDTO dto){
+    public Usuario (UsuarioCadastroDTO dto){
         this.nome = dto.nome();
         this.email = dto.email();
         this.senha = dto.senha();

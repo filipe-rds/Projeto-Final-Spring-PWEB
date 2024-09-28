@@ -1,6 +1,6 @@
 package com.api.users.controller;
 
-import com.api.users.dto.UsuarioDTO;
+import com.api.users.dto.UsuarioCadastroDTO;
 import com.api.users.dto.UsuarioListagemDTO;
 import com.api.users.dto.UsuarioLoginDTO;
 import com.api.users.dto.UsuarioRetornadoDTO;
@@ -22,7 +22,7 @@ public class UsuarioController {
 
     // Adicionar um novo usuário
     @PostMapping
-    public ResponseEntity<Usuario> adicionar(@RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<Usuario> adicionar(@RequestBody UsuarioCadastroDTO usuarioDTO) {
         try {
             Usuario usuarioAdicionado = service.adicionar(usuarioDTO);
             return new ResponseEntity<>(usuarioAdicionado, HttpStatus.CREATED);
@@ -33,12 +33,14 @@ public class UsuarioController {
 
     // Atualizar um usuário existente
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public ResponseEntity<UsuarioRetornadoDTO> atualizar(@PathVariable Long id, @RequestBody Usuario usuarioRecebido) {
         Usuario usuarioExistente = service.buscarPorId(id);
         if (usuarioExistente != null) {
-            usuario.setId(id); // Certificar-se de que o ID não seja alterado
-            Usuario usuarioAtualizado = service.atualizar(usuario);
-            return new ResponseEntity<>(usuarioAtualizado, HttpStatus.OK);
+            usuarioRecebido.setId(id); // Certificar-se de que o ID não seja alterado
+            Usuario usuarioAtualizado = service.atualizar(usuarioRecebido);
+            UsuarioRetornadoDTO usuario = new UsuarioRetornadoDTO(usuarioAtualizado.getId(),usuarioAtualizado.getNome(),usuarioAtualizado.getEmail());
+
+            return new ResponseEntity<>(usuario, HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
@@ -56,11 +58,14 @@ public class UsuarioController {
 
     // Buscar usuário por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
-        Usuario usuario = service.buscarPorId(id);
-        if (usuario != null) {
+    public ResponseEntity<UsuarioRetornadoDTO> buscarPorId(@PathVariable Long id) {
+        Usuario usuarioBuscado = service.buscarPorId(id);
+
+        if (usuarioBuscado != null) {
+            UsuarioRetornadoDTO usuario = new UsuarioRetornadoDTO(usuarioBuscado.getId(), usuarioBuscado.getNome(), usuarioBuscado.getEmail());
             return new ResponseEntity<>(usuario, HttpStatus.OK);
         }
+
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 

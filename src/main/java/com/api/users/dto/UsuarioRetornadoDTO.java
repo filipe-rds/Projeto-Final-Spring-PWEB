@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotEmpty;
 public record UsuarioRetornadoDTO(
         @NotEmpty(message = "Id não deve estar vazio")
         Long id,
+        @NotBlank
+        String nome,
         @Email
         String email
 ) {

@@ -16,12 +16,13 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository repository;
 
-    public Usuario adicionar(UsuarioCadastroDTO usuario) {
+    public UsuarioRetornadoDTO adicionar(UsuarioCadastroDTO usuario) {
         Usuario usuarioAdicionado = new Usuario(usuario);
         if (repository.findByEmail(usuarioAdicionado.getEmail()) != null) {
             throw new RuntimeException("Usuário já cadastrado!");
         }
-        return repository.save(usuarioAdicionado);
+        repository.save(usuarioAdicionado);
+        return new UsuarioRetornadoDTO(usuarioAdicionado.getId(), usuarioAdicionado.getNome(), usuarioAdicionado.getEmail());
     }
 
     public Usuario atualizar(Usuario usuario) {

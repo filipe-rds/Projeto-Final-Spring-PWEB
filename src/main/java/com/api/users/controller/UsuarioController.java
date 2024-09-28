@@ -22,9 +22,9 @@ public class UsuarioController {
 
     // Adicionar um novo usuário
     @PostMapping
-    public ResponseEntity<Usuario> adicionar(@RequestBody UsuarioCadastroDTO usuarioDTO) {
+    public ResponseEntity<UsuarioRetornadoDTO> adicionar(@RequestBody UsuarioCadastroDTO usuarioDTO) {
         try {
-            Usuario usuarioAdicionado = service.adicionar(usuarioDTO);
+            UsuarioRetornadoDTO usuarioAdicionado = service.adicionar(usuarioDTO);
             return new ResponseEntity<>(usuarioAdicionado, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);

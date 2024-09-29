@@ -5,11 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
 public record UsuarioRetornadoDTO(
-        @NotEmpty(message = "Id não deve estar vazio")
+        @NotEmpty(message = "O ID é obrigatório e não deve estar vazio.")
         Long id,
-        @NotBlank
+
+        @NotBlank(message = "O nome é obrigatório e não deve estar em branco.")
         String nome,
-        @Email
+
+        @NotBlank(message = "O email é obrigatório e não deve estar em branco.")
+        @Email(message = "O email deve estar em um formato válido (exemplo: usuario@dominio.com).")
         String email
 ) {
 }

@@ -1,12 +1,12 @@
 package com.api.users.service;
 
 
-import com.api.users.dto.UsuarioRecebidoDTO;
+import com.api.users.dto.UsuarioAtualizacaoDTO;
+import com.api.users.dto.UsuarioCadastroDTO;
 import com.api.users.dto.UsuarioListagemDTO;
 import com.api.users.dto.UsuarioRetornadoDTO;
 import com.api.users.entity.Usuario;
 import com.api.users.repository.UsuarioRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ public class UsuarioService {
     private UsuarioRepository repository;
 
     @Transactional
-    public UsuarioRetornadoDTO adicionar(UsuarioRecebidoDTO usuario) {
+    public UsuarioRetornadoDTO adicionar(UsuarioCadastroDTO usuario) {
         Usuario usuarioAdicionado = new Usuario(usuario);
         if (repository.findByEmail(usuarioAdicionado.getEmail()) != null) {
             throw new RuntimeException("Usuário já cadastrado!");
@@ -29,26 +29,35 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario atualizar(Long id, @Valid UsuarioRecebidoDTO usuarioDTO) {
-        // Buscar o usuário existente no banco de dados
-        Usuario usuario = repository.findById(id)
+    public Usuario atualizar(Long id, UsuarioAtualizacaoDTO usuarioDTO) {
+        Usuario usuarioExistente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
-        // Atualizar os campos enviados no DTO
-        if (!usuarioDTO.nome().isBlank()) {
-            usuario.setNome(usuarioDTO.nome());
+        // Validar nome
+        if (usuarioDTO.nome() != null) {
+            if (usuarioDTO.nome().isBlank() || usuarioDTO.nome().length() < 2 || usuarioDTO.nome().length() > 60) {
+                throw new RuntimeException("O nome deve ter entre 2 e 60 caracteres.");
+            }
+            usuarioExistente.setNome(usuarioDTO.nome());
         }
 
-        if (!usuarioDTO.email().isBlank()) {
-            usuario.setEmail(usuarioDTO.email());
+        // Validar email
+        if (usuarioDTO.email() != null) {
+            if (!usuarioDTO.email().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+                throw new RuntimeException("O email deve ser válido e estar no formato correto(exemplo: usuario@dominio.com).");
+            }
+            usuarioExistente.setEmail(usuarioDTO.email());
         }
 
-        if (!usuarioDTO.senha().isBlank()) {
-            usuario.setSenha(usuarioDTO.senha());
+        // Validar senha
+        if (usuarioDTO.senha() != null) {
+            if (!usuarioDTO.senha().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$")) {
+                throw new RuntimeException("A senha deve conter pelo menos 8 caracteres, incluindo letras e números.");
+            }
+            usuarioExistente.setSenha(usuarioDTO.senha());
         }
 
-        // Salvar e retornar a entidade atualizada
-        return repository.save(usuario);
+        return repository.save(usuarioExistente);
     }
 
     public void remover(Long id) {

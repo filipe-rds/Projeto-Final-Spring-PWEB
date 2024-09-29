@@ -21,7 +21,7 @@ public class UsuarioController {
 
     // Adicionar um novo usuário
     @PostMapping
-    public ResponseEntity<UsuarioRetornadoDTO> adicionar(@RequestBody @Valid UsuarioRecebidoDTO usuarioDTO) {
+    public ResponseEntity<UsuarioRetornadoDTO> adicionar(@RequestBody @Valid UsuarioCadastroDTO usuarioDTO) {
         try {
             UsuarioRetornadoDTO usuarioAdicionado = service.adicionar(usuarioDTO);
             return new ResponseEntity<>(usuarioAdicionado, HttpStatus.CREATED);
@@ -32,7 +32,7 @@ public class UsuarioController {
 
     // Atualizar um usuário existente
     @PatchMapping("/{id}")
-    public ResponseEntity<UsuarioRetornadoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioRecebidoDTO usuarioDTO) {
+    public ResponseEntity<UsuarioRetornadoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioAtualizacaoDTO usuarioDTO) {
         Usuario usuarioAtualizado = service.atualizar(id, usuarioDTO);
         if (usuarioAtualizado != null) {
             UsuarioRetornadoDTO usuario = new UsuarioRetornadoDTO(usuarioAtualizado.getId(), usuarioAtualizado.getNome(),usuarioAtualizado.getEmail());

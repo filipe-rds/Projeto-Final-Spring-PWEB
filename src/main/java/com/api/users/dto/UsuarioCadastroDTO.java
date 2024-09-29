@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record UsuarioRecebidoDTO(
+public record UsuarioCadastroDTO(
         @NotBlank(message = "O nome é obrigatório e não pode estar vazio ou em branco.")
         @Size(min = 2, max = 60, message = "O nome deve ter entre 2 e 60 caracteres.")
         String nome,

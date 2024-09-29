@@ -1,11 +1,9 @@
 package com.api.users.controller;
 
-import com.api.users.dto.UsuarioCadastroDTO;
-import com.api.users.dto.UsuarioListagemDTO;
-import com.api.users.dto.UsuarioLoginDTO;
-import com.api.users.dto.UsuarioRetornadoDTO;
+import com.api.users.dto.*;
 import com.api.users.entity.Usuario;
 import com.api.users.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
+@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     @Autowired
@@ -22,7 +21,7 @@ public class UsuarioController {
 
     // Adicionar um novo usuário
     @PostMapping
-    public ResponseEntity<UsuarioRetornadoDTO> adicionar(@RequestBody UsuarioCadastroDTO usuarioDTO) {
+    public ResponseEntity<UsuarioRetornadoDTO> adicionar(@RequestBody @Valid UsuarioRecebidoDTO usuarioDTO) {
         try {
             UsuarioRetornadoDTO usuarioAdicionado = service.adicionar(usuarioDTO);
             return new ResponseEntity<>(usuarioAdicionado, HttpStatus.CREATED);
@@ -32,13 +31,11 @@ public class UsuarioController {
     }
 
     // Atualizar um usuário existente
-    @PutMapping("/{id}")
-    public ResponseEntity<UsuarioRetornadoDTO> atualizar(@PathVariable Long id, @RequestBody Usuario usuarioRecebido) {
-        Usuario usuarioExistente = service.buscarPorId(id);
-        if (usuarioExistente != null) {
-            usuarioRecebido.setId(id); // Certificar-se de que o ID não seja alterado
-            Usuario usuarioAtualizado = service.atualizar(usuarioRecebido);
-            UsuarioRetornadoDTO usuario = new UsuarioRetornadoDTO(usuarioAtualizado.getId(),usuarioAtualizado.getNome(),usuarioAtualizado.getEmail());
+    @PatchMapping("/{id}")
+    public ResponseEntity<UsuarioRetornadoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioRecebidoDTO usuarioDTO) {
+        Usuario usuarioAtualizado = service.atualizar(id, usuarioDTO);
+        if (usuarioAtualizado != null) {
+            UsuarioRetornadoDTO usuario = new UsuarioRetornadoDTO(usuarioAtualizado.getId(), usuarioAtualizado.getNome(),usuarioAtualizado.getEmail());
 
             return new ResponseEntity<>(usuario, HttpStatus.OK);
         }
@@ -78,7 +75,7 @@ public class UsuarioController {
 
     // Fazer login
     @PostMapping("/login")
-    public ResponseEntity<UsuarioRetornadoDTO> login(@RequestBody UsuarioLoginDTO loginDTO) {
+    public ResponseEntity<UsuarioRetornadoDTO> login(@RequestBody @Valid UsuarioLoginDTO loginDTO) {
         try {
             UsuarioRetornadoDTO usuario = service.login(loginDTO.email(), loginDTO.senha());
             return new ResponseEntity<>(usuario, HttpStatus.OK);

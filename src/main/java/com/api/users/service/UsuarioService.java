@@ -1,13 +1,15 @@
 package com.api.users.service;
 
 
-import com.api.users.dto.UsuarioCadastroDTO;
+import com.api.users.dto.UsuarioRecebidoDTO;
 import com.api.users.dto.UsuarioListagemDTO;
 import com.api.users.dto.UsuarioRetornadoDTO;
 import com.api.users.entity.Usuario;
 import com.api.users.repository.UsuarioRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,7 +18,8 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository repository;
 
-    public UsuarioRetornadoDTO adicionar(UsuarioCadastroDTO usuario) {
+    @Transactional
+    public UsuarioRetornadoDTO adicionar(UsuarioRecebidoDTO usuario) {
         Usuario usuarioAdicionado = new Usuario(usuario);
         if (repository.findByEmail(usuarioAdicionado.getEmail()) != null) {
             throw new RuntimeException("Usuário já cadastrado!");
@@ -25,7 +28,26 @@ public class UsuarioService {
         return new UsuarioRetornadoDTO(usuarioAdicionado.getId(), usuarioAdicionado.getNome(), usuarioAdicionado.getEmail());
     }
 
-    public Usuario atualizar(Usuario usuario) {
+    @Transactional
+    public Usuario atualizar(Long id, @Valid UsuarioRecebidoDTO usuarioDTO) {
+        // Buscar o usuário existente no banco de dados
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+
+        // Atualizar os campos enviados no DTO
+        if (!usuarioDTO.nome().isBlank()) {
+            usuario.setNome(usuarioDTO.nome());
+        }
+
+        if (!usuarioDTO.email().isBlank()) {
+            usuario.setEmail(usuarioDTO.email());
+        }
+
+        if (!usuarioDTO.senha().isBlank()) {
+            usuario.setSenha(usuarioDTO.senha());
+        }
+
+        // Salvar e retornar a entidade atualizada
         return repository.save(usuario);
     }
 

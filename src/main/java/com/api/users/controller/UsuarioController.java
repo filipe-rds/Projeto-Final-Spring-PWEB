@@ -2,6 +2,10 @@ package com.api.users.controller;
 
 import com.api.users.dto.*;
 import com.api.users.entity.Usuario;
+import com.api.users.exception.LoginFailedException;
+import com.api.users.exception.UsuarioAlreadyExistsException;
+import com.api.users.exception.UsuarioNotFoundException;
+import com.api.users.exception.ValidationException;
 import com.api.users.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,45 +29,56 @@ public class UsuarioController {
         try {
             UsuarioRetornadoDTO usuarioAdicionado = service.adicionar(usuarioDTO);
             return new ResponseEntity<>(usuarioAdicionado, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
+        } catch (UsuarioAlreadyExistsException e) {
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // Atualizar um usuário existente
     @PatchMapping("/{id}")
     public ResponseEntity<UsuarioRetornadoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioAtualizacaoDTO usuarioDTO) {
-        Usuario usuarioAtualizado = service.atualizar(id, usuarioDTO);
-        if (usuarioAtualizado != null) {
-            UsuarioRetornadoDTO usuario = new UsuarioRetornadoDTO(usuarioAtualizado.getId(), usuarioAtualizado.getNome(),usuarioAtualizado.getEmail());
-
-            return new ResponseEntity<>(usuario, HttpStatus.OK);
+        try {
+            Usuario usuarioAtualizado = service.atualizar(id, usuarioDTO);
+            UsuarioRetornadoDTO usuarioRetornado = new UsuarioRetornadoDTO(usuarioAtualizado.getId(), usuarioAtualizado.getNome(), usuarioAtualizado.getEmail());
+            return new ResponseEntity<>(usuarioRetornado, HttpStatus.OK);
+        } catch (UsuarioNotFoundException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     // Remover um usuário
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable Long id) {
-        Usuario usuario = service.buscarPorId(id);
-        if (usuario != null) {
+        try {
             service.remover(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (UsuarioNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     // Buscar usuário por ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioRetornadoDTO> buscarPorId(@PathVariable Long id) {
-        Usuario usuarioBuscado = service.buscarPorId(id);
-
-        if (usuarioBuscado != null) {
+        try {
+            Usuario usuarioBuscado = service.buscarPorId(id);
             UsuarioRetornadoDTO usuario = new UsuarioRetornadoDTO(usuarioBuscado.getId(), usuarioBuscado.getNome(), usuarioBuscado.getEmail());
             return new ResponseEntity<>(usuario, HttpStatus.OK);
+        } catch (UsuarioNotFoundException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     // Listar todos os usuários
@@ -79,8 +94,10 @@ public class UsuarioController {
         try {
             UsuarioRetornadoDTO usuario = service.login(loginDTO.email(), loginDTO.senha());
             return new ResponseEntity<>(usuario, HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (LoginFailedException e) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -11,7 +11,7 @@
     <groupId>com.api</groupId>
     <artifactId>Users</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>Users_API</name>
     <description>Users_API</description>
     <url/>
